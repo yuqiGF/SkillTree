@@ -2,7 +2,7 @@
 
 个人技能图谱平台。包含注册登录、公共 Skill Hub、分类和别名搜索、个人技能状态、可拖拽的有向无环图、私有技能与社区投稿审核。
 
-开发者：**宇崎崎** · 联系方式：[yuqigf@qq.com](mailto:yuqigf@qq.com) · 开源协议：[MIT](LICENSE)
+开发者：**宇崎崎andGPT** · 联系方式：[yuqigf@qq.com](mailto:yuqigf@qq.com) · 开源协议：[MIT](LICENSE)
 
 ## 技术栈
 
