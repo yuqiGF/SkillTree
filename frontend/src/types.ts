@@ -1,0 +1,11 @@
+export type Page = 'home' | 'hub' | 'mine' | 'trees' | 'submissions' | 'admin'
+export type User = { id: number; username: string; email: string; role: string }
+export type Group = { id: number; name: string; description: string }
+export type Category = { id: number; name: string; icon: string; groups: Group[] }
+export type Skill = { id: number; name: string; description: string; sourceType: string; status: string; difficulty: number; groupId: number; groupName: string; categoryId: number; categoryName: string; usageCount: number }
+export type MySkill = Skill & { level: number; note: string; status: string }
+export type TreeSummary = { id: number; name: string; description: string; visibility: string; nodeCount: number; createdAt: string }
+export type TreeNode = { id: number; skillId: number; x: number; y: number; customLabel: string | null; name: string; description: string; level: number | null; status: string | null; note: string | null }
+export type TreeEdge = { id: number; sourceNodeId: number; targetNodeId: number }
+export type TreeDetail = { tree: TreeSummary; nodes: TreeNode[]; edges: TreeEdge[] }
+export type Submission = { id: number; name: string; status: string; sourceType: string; groupName: string; description?: string; creatorName?: string; reviewReason?: string }

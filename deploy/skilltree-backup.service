@@ -1,0 +1,14 @@
+[Unit]
+Description=Back up SkillTree SQLite database
+
+[Service]
+Type=oneshot
+User=skilltree
+Group=skilltree
+WorkingDirectory=/opt/skilltree
+ExecStart=/usr/bin/python3 /opt/skilltree/backup.py
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/skilltree/backups

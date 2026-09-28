@@ -1,0 +1,27 @@
+[Unit]
+Description=SkillTree web application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=skilltree
+Group=skilltree
+WorkingDirectory=/opt/skilltree
+Environment=SPRING_PROFILES_ACTIVE=sqlite
+Environment=PORT=5200
+Environment=HOST=0.0.0.0
+Environment=DB_URL=jdbc:sqlite:/opt/skilltree/data/skilltree.db
+EnvironmentFile=-/etc/skilltree.env
+ExecStart=/usr/lib/jvm/java-21-alibaba-dragonwell-21.0.5.0.5-1.1.al8.x86_64/bin/java -Xms64m -Xmx512m -XX:+UseSerialGC -jar /opt/skilltree/app.jar
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/skilltree/data /opt/skilltree/backups
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
