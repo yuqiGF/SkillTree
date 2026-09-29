@@ -35,6 +35,7 @@ export default function TreeEditor({ treeId, ownerName, onBack, notify }: { tree
   const [status, setStatus] = useState('WANT_TO_LEARN')
   const [level, setLevel] = useState(1)
   const [busy, setBusy] = useState(false)
+  const [sideOpen, setSideOpen] = useState(true)
   const [collapsedNodes, setCollapsedNodes] = useState<Set<number>>(() => new Set())
 
   const reload = useCallback(async () => {
@@ -164,9 +165,9 @@ export default function TreeEditor({ treeId, ownerName, onBack, notify }: { tree
 
   return <div className="tree-editor">
     <div className="editor-toolbar">
-      <button className="back-button" onClick={onBack}><ArrowLeft size={19} /> 返回图谱</button>
+      <button className="back-button" onClick={onBack}><ArrowLeft size={19} /> 返回技能树</button>
       <div><span className="section-kicker">SKILL GRAPH EDITOR</span><h2>{detail?.tree.name || '加载中...'}</h2></div>
-      <div className="editor-toolbar-actions"><span className="saved-label"><Check size={15} /> 自动保存</span><button className="button button-dark small" onClick={() => setAddOpen(true)}><Plus size={17} /> 添加主技能</button></div>
+      <div className="editor-toolbar-actions"><span className="saved-label"><Check size={15} /> 自动保存</span><button className="inspector-visibility" onClick={() => setSideOpen((value) => !value)} aria-label={sideOpen ? '隐藏右侧面板' : '显示右侧面板'} title={sideOpen ? '隐藏右侧面板' : '显示右侧面板'}>{sideOpen ? <ChevronRight size={17} /> : <ChevronDown size={17} />}<span>{sideOpen ? '隐藏面板' : '显示面板'}</span></button><button className="button button-dark small" onClick={() => setAddOpen(true)}><Plus size={17} /> 添加主技能</button></div>
     </div>
     <div className="editor-workspace">
       <div className="flow-canvas">
@@ -185,8 +186,8 @@ export default function TreeEditor({ treeId, ownerName, onBack, notify }: { tree
         </ReactFlow>
         {nodes.length === 0 && <div className="canvas-empty"><div><GitBranch size={30} /></div><strong>从一个主技能开始</strong><p>添加后点选节点，在右侧展开并挑选子技能。</p><button className="button button-dark" onClick={() => setAddOpen(true)}><Plus size={17} /> 添加主技能</button></div>}
       </div>
-      <aside className="editor-side">
-        <div className="editor-side-head"><span className="section-kicker">SKILL INSPECTOR</span><h3>{selectedNode ? selectedNode.name : '图谱指南'}</h3></div>
+      {sideOpen && <aside className="editor-side">
+        <div className="editor-side-head"><span className="section-kicker">SKILL INSPECTOR</span><button className="inspector-close" onClick={() => setSideOpen(false)} aria-label="隐藏右侧面板" title="隐藏右侧面板"><X size={17} /></button><h3>{selectedNode ? selectedNode.name : '技能树指南'}</h3></div>
         {selectedNode ? <>
           <p className="editor-side-desc">{selectedNode.description || '记录这个技能的成长状态。'}</p>
           {catalogDetail?.parents.length ? <div className="inspector-parent-path">上级技能：{catalogDetail.parents.map((parent) => parent.name).join(' · ')}</div> : null}
@@ -221,7 +222,7 @@ export default function TreeEditor({ treeId, ownerName, onBack, notify }: { tree
           <div className="instruction"><span>03</span><div><strong>记录学习进度</strong><p>每个技能都能独立设置状态和熟练度。</p></div></div>
           <div className="editor-hint"><CircleHelp size={17} /> 点击节点上的箭头收起或展开下级；也可拖动节点和手工连线。</div>
         </>}
-      </aside>
+      </aside>}
     </div>
     {addOpen && <div className="modal-backdrop" onMouseDown={() => setAddOpen(false)}><div className="form-modal add-modal" onMouseDown={(event) => event.stopPropagation()}>
       <button className="modal-close" onClick={() => setAddOpen(false)}><X size={20} /></button>

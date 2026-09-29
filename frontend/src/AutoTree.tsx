@@ -3,7 +3,7 @@ import {
   Background, Controls, Handle, MarkerType, MiniMap, Position, ReactFlow,
   type Edge, type Node, type NodeProps, type ReactFlowInstance,
 } from '@xyflow/react'
-import { ArrowLeft, Check, ChevronDown, ChevronUp, GitBranch, Layers3, Plus, Search, Sparkles, UserRound, X } from 'lucide-react'
+import { ArrowLeft, Check, ChevronDown, ChevronRight, ChevronUp, GitBranch, Layers3, Plus, Search, Sparkles, UserRound, X } from 'lucide-react'
 import { api, errorMessage } from './api'
 import { BubbleNode } from './GraphNodes'
 import type { Category, MySkill, Skill, SkillDetail } from './types'
@@ -105,6 +105,7 @@ export default function AutoTree({ ownerName, categoryId, onBack, notify }: { ow
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Skill[]>([])
   const [busy, setBusy] = useState(false)
+  const [sideOpen, setSideOpen] = useState(true)
   const [flow, setFlow] = useState<ReactFlowInstance | null>(null)
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
@@ -118,7 +119,7 @@ export default function AutoTree({ ownerName, categoryId, onBack, notify }: { ow
   const categoryName = categories.find((category) => category.id === categoryId)?.name
   const toggleNode = useCallback((id: string) => setCollapsed((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next }), [])
   const { nodes, edges } = useMemo(() => buildAutoGraph(ownerName, categories, visibleMine, categoryId, collapsed, toggleNode), [ownerName, categories, visibleMine, categoryId, collapsed, toggleNode])
-  useEffect(() => { if (flow && nodes.length) window.requestAnimationFrame(() => flow.fitView({ padding: 0.18, duration: 350, maxZoom: 1 })) }, [flow, nodes])
+  useEffect(() => { if (flow && nodes.length) window.requestAnimationFrame(() => flow.fitView({ padding: 0.18, duration: 350, maxZoom: 1 })) }, [flow, nodes, sideOpen])
   const selectedSkill = visibleMine.find((skill) => skill.id === selectedSkillId)
   useEffect(() => {
     if (!selectedSkillId) { setCatalogDetail(null); return }
@@ -162,14 +163,14 @@ export default function AutoTree({ ownerName, categoryId, onBack, notify }: { ow
   const ownedIds = new Set(visibleMine.map((skill) => skill.id))
 
   return <div className="tree-editor auto-tree-editor">
-    <div className="editor-toolbar"><button className="back-button" onClick={onBack}><ArrowLeft size={19} /> 返回图谱</button><div><span className="section-kicker">AUTOMATIC SKILL TREE</span><h2>{categoryId === undefined ? `${ownerName}的总体技能树` : `${categoryName || '分类'}技能树`}</h2></div><div className="editor-toolbar-actions"><span className="saved-label"><Check size={15} /> 随我的技能自动更新</span><button className="button button-dark small" onClick={() => setAddOpen(true)}><Plus size={17} /> 添加技能</button></div></div>
+    <div className="editor-toolbar"><button className="back-button" onClick={onBack}><ArrowLeft size={19} /> 返回技能树</button><div><span className="section-kicker">AUTOMATIC SKILL TREE</span><h2>{categoryId === undefined ? `${ownerName}的总体技能树` : `${categoryName || '分类'}技能树`}</h2></div><div className="editor-toolbar-actions"><span className="saved-label"><Check size={15} /> 随我的技能自动更新</span><button className="inspector-visibility" onClick={() => setSideOpen((value) => !value)} aria-label={sideOpen ? '隐藏右侧面板' : '显示右侧面板'} title={sideOpen ? '隐藏右侧面板' : '显示右侧面板'}>{sideOpen ? <ChevronRight size={17} /> : <ChevronDown size={17} />}<span>{sideOpen ? '隐藏面板' : '显示面板'}</span></button><button className="button button-dark small" onClick={() => setAddOpen(true)}><Plus size={17} /> 添加技能</button></div></div>
     <div className="editor-workspace"><div className="flow-canvas">
       <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onInit={setFlow} nodesDraggable={false} nodesConnectable={false} edgesFocusable={false} elementsSelectable onNodeClick={(_, node) => node.id.startsWith('skill-') ? chooseSkill(Number(node.id.slice(6))) : setSelectedSkillId(null)} onPaneClick={() => setSelectedSkillId(null)} fitView minZoom={0.15} maxZoom={1.5}>
         <Background color="#d9e7df" gap={25} size={1.3} /><Controls showInteractive={false} /><MiniMap zoomable pannable nodeColor={(node) => node.id === 'person' || node.id === `category-${categoryId}` ? '#327c60' : node.id.startsWith('skill-') ? '#79b797' : '#a7d2b8'} maskColor="rgba(244,248,246,.62)" />
       </ReactFlow>
       {visibleMine.length === 0 && <div className="canvas-empty auto-empty"><strong>{categoryId === undefined ? '你的技能树已经生根' : `${categoryName || '分类'}技能树已经生根`}</strong><p>添加技能后，技能组和技能枝叶会自动向上生长。</p><button className="button button-dark" onClick={() => setAddOpen(true)}><Plus size={17} /> 添加第一个技能</button></div>}
-    </div><aside className="editor-side">
-      <div className="editor-side-head"><span className="section-kicker">GROWTH PATH</span><h3>{selectedSkill ? selectedSkill.name : '自下而上生长'}</h3></div>
+    </div>{sideOpen && <aside className="editor-side">
+      <div className="editor-side-head"><span className="section-kicker">GROWTH PATH</span><button className="inspector-close" onClick={() => setSideOpen(false)} aria-label="隐藏右侧面板" title="隐藏右侧面板"><X size={17} /></button><h3>{selectedSkill ? selectedSkill.name : '自下而上生长'}</h3></div>
       {selectedSkill ? <>
         <p className="editor-side-desc">{selectedSkill.categoryName} → {selectedSkill.groupName} → {selectedSkill.name}</p>
         {selectedSkill.parents?.length > 0 && <div className="inspector-parent-path">上级技能：{selectedSkill.parents.map((parent) => parent.name).join(' · ')}</div>}
@@ -180,7 +181,7 @@ export default function AutoTree({ ownerName, categoryId, onBack, notify }: { ow
           <div className="inspector-child-list">{visibleChildren.map((child) => <button key={child.id} onClick={() => ownedIds.has(child.id) ? chooseSkill(child.id) : addSkill(child.id, child.name)} disabled={busy}><span className="child-list-icon">{child.name.slice(0, 1).toUpperCase()}</span><span className="child-list-name">{child.name}</span><span className={ownedIds.has(child.id) ? 'child-list-added' : 'child-list-add'}>{ownedIds.has(child.id) ? <Check size={15} /> : <Plus size={16} />}</span></button>)}{catalogDetail && visibleChildren.length === 0 && <div className="inspector-child-empty">{childFilter ? '没有匹配的子技能' : '暂无子技能'}</div>}</div>
         </div>}
       </> : <><div className="instruction"><span>01</span><div><strong>{categoryId === undefined ? '个人树根' : '分类树根'}</strong><p>树根始终在底部，{categoryId === undefined ? '代表你自己' : `代表${categoryName || '当前分类'}`}。</p></div></div><div className="instruction"><span>02</span><div><strong>{categoryId === undefined ? '分类与技能组' : '技能组'}</strong><p>上方依次长出具体方向和技能。</p></div></div><div className="instruction"><span>03</span><div><strong>技能与子技能</strong><p>从「我的技能」添加后自动出现，每项学习进度单独记录。</p></div></div><div className="editor-hint"><Sparkles size={17} /> 点击技能节点可继续添加子技能。</div></>}
-    </aside></div>
+    </aside>}</div>
     {addOpen && <div className="modal-backdrop" onMouseDown={() => setAddOpen(false)}><div className="form-modal add-modal" onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" onClick={() => setAddOpen(false)}><X size={20} /></button><span className="section-kicker">GROW YOUR TREE</span><h2>添加一个技能分支</h2><p className="modal-subtitle">选择主技能，系统会自动放在对应的技能组上方。</p><div className="search-box"><Search size={19} /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索 Java、MySQL、设计…" /></div><div className="add-results">{results.map((skill, index) => <button key={skill.id} onClick={() => ownedIds.has(skill.id) ? chooseSkill(skill.id) : addSkill(skill.id, skill.name)} disabled={busy}><span className={`skill-icon tint-${index % 5}`}>{skill.name.slice(0, 1)}</span><span><strong>{skill.name}</strong><small>{skill.categoryName} / {skill.groupName} · {skill.subskillCount} 个子技能</small></span>{ownedIds.has(skill.id) ? <Check size={18} /> : <Plus size={18} />}</button>)}{results.length === 0 && <p className="muted">没有匹配的技能，试试其他关键词。</p>}</div></div></div>}
   </div>
 }

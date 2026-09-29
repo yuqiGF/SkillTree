@@ -49,7 +49,7 @@ export default function TreeGallery({ user, trees, onLogin, onOpen, onRefresh, n
   const shown = trees.filter((tree) => visibleIds.has(tree.id))
 
   return <div className="page">
-    <div className="page-heading"><div><span className="section-kicker">MY SKILL GRAPHS</span><h1>技能图谱<span className="heading-accent">.</span></h1><p>总体树与分类树从下向上生长，你可以选择要展示的树。</p></div><button className="button button-dark" onClick={() => user ? setCreating(true) : onLogin()}><Plus size={18} /> 新建图谱</button></div>
+    <div className="page-heading"><div><span className="section-kicker">MY SKILL TREES</span><h1>技能树<span className="heading-accent">.</span></h1><p>总体树与分类树从下向上生长，你可以选择要展示的树。</p></div><button className="button button-dark" onClick={() => user ? setCreating(true) : onLogin()}><Plus size={18} /> 新建自定义树</button></div>
     {!user ? <div className="empty-state auth-empty"><GitBranch size={34} /><strong>登录后查看你的技能树</strong><p>你的树根会自动出现，技能从这里向上生长。</p><button className="button button-dark" onClick={onLogin}>登录 / 注册 <ArrowRight size={17} /></button></div> : <>
       <div className="tree-tip"><div className="tree-tip-icon"><GitBranch size={22} /></div><div><strong>技能树随你的学习自动生长</strong><span>总体树显示完整路径；分类树只显示对应方向。点节点上的箭头可展开或收起下级。</span></div><Sparkles size={22} /></div>
       <div className="tree-gallery-toolbar"><div><strong>已展示 {shown.length} / {trees.length} 棵树</strong><span>添加技能后，对应的分类树会自动更新</span></div><button onClick={() => setManaging((value) => !value)} aria-expanded={managing}><Settings2 size={16} /> 管理显示 <ChevronDown size={15} className={managing ? 'open' : ''} /></button></div>
