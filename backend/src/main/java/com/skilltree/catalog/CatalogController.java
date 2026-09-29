@@ -26,7 +26,7 @@ public class CatalogController {
     public CatalogController(Db db, AuthService auth, AutomaticReviewService automaticReview) { this.db = db; this.auth = auth; this.automaticReview = automaticReview; }
     public static String normalize(String text) { return Normalizer.normalize(text.strip(), Normalizer.Form.NFKC).toLowerCase().replaceAll("\\s+", ""); }
     public record UserSkillInput(@Min(1) @Max(5) int level, @NotBlank String status, @Size(max=1000) String note) {}
-    public record Submission(@NotBlank @Size(max=100) String name, @NotNull Long groupId, @Size(max=4000) String description, List<@Size(max=100) String> aliases, @NotBlank String visibility) {}
+    public record Submission(@NotBlank @Size(max=100) String name, @NotNull Long groupId, @Size(max=4000) String description, List<@Size(max=100) String> aliases, @NotBlank String visibility, Long parentSkillId) {}
 
     @GetMapping("/categories")
     public List<Map<String, Object>> categories() {
@@ -40,13 +40,13 @@ public class CatalogController {
         @RequestParam(required=false) Long groupId, @RequestParam(defaultValue="0") @Min(0) @Max(1000) int page,
         @RequestHeader(value="Authorization",required=false) String authorization) {
         long userId = authorization == null ? -1 : auth.userId(authorization);
-        StringBuilder sql = new StringBuilder("SELECT s.id,s.name,s.description,s.source_type AS sourceType,s.status,s.difficulty,g.id AS groupId,g.name AS groupName,c.id AS categoryId,c.name AS categoryName,(SELECT COUNT(*) FROM user_skills us WHERE us.skill_id=s.id) AS usageCount FROM skills s JOIN skill_groups g ON g.id=s.group_id JOIN categories c ON c.id=g.category_id WHERE (s.status='APPROVED' OR s.creator_id=?)");
-        List<Object> args = new ArrayList<>(); args.add(userId);
+        StringBuilder sql = new StringBuilder("SELECT s.id,s.name,s.description,s.source_type AS sourceType,s.status,s.difficulty,g.id AS groupId,g.name AS groupName,c.id AS categoryId,c.name AS categoryName,(SELECT COUNT(*) FROM user_skills us WHERE us.skill_id=s.id) AS usageCount,(SELECT COUNT(*) FROM skill_subskills ss JOIN skills child ON child.id=ss.child_skill_id WHERE ss.parent_skill_id=s.id AND (child.status='APPROVED' OR child.creator_id=?)) AS subskillCount FROM skills s JOIN skill_groups g ON g.id=s.group_id JOIN categories c ON c.id=g.category_id WHERE (s.status='APPROVED' OR s.creator_id=?)");
+        List<Object> args = new ArrayList<>(); args.add(userId); args.add(userId);
         if (categoryId != null) { sql.append(" AND c.id=?"); args.add(categoryId); }
         if (groupId != null) { sql.append(" AND g.id=?"); args.add(groupId); }
         if (q != null && !q.isBlank()) {
-            sql.append(" AND (s.normalized_name LIKE ? OR EXISTS (SELECT 1 FROM skill_aliases a WHERE a.skill_id=s.id AND a.normalized_alias LIKE ?))");
-            String needle = "%" + normalize(q) + "%"; args.add(needle); args.add(needle);
+            sql.append(" AND (s.normalized_name LIKE ? OR EXISTS (SELECT 1 FROM skill_aliases a WHERE a.skill_id=s.id AND a.normalized_alias LIKE ?) OR EXISTS (SELECT 1 FROM skill_subskills ss JOIN skills parent ON parent.id=ss.parent_skill_id WHERE ss.child_skill_id=s.id AND parent.normalized_name LIKE ? AND (parent.status='APPROVED' OR parent.creator_id=?)))");
+            String needle = "%" + normalize(q) + "%"; args.add(needle); args.add(needle); args.add(needle); args.add(userId);
             sql.append(" ORDER BY CASE WHEN s.normalized_name=? THEN 0 WHEN EXISTS (SELECT 1 FROM skill_aliases a WHERE a.skill_id=s.id AND a.normalized_alias=?) THEN 1 WHEN s.normalized_name LIKE ? THEN 2 ELSE 3 END,usageCount DESC,s.name");
             args.add(normalize(q)); args.add(normalize(q)); args.add(normalize(q) + "%");
         } else sql.append(" ORDER BY usageCount DESC,s.id");
@@ -56,10 +56,12 @@ public class CatalogController {
     @GetMapping("/skills/{id}")
     public Map<String, Object> skill(@PathVariable long id, @RequestHeader(value="Authorization",required=false) String authorization) {
         long userId = authorization == null ? -1 : auth.userId(authorization);
-        Map<String, Object> skill = db.one("SELECT s.id,s.name,s.description,s.source_type AS sourceType,s.status,s.difficulty,s.creator_id AS creatorId,g.id AS groupId,g.name AS groupName,c.id AS categoryId,c.name AS categoryName FROM skills s JOIN skill_groups g ON g.id=s.group_id JOIN categories c ON c.id=g.category_id WHERE s.id=?", id);
+        Map<String, Object> skill = db.one("SELECT s.id,s.name,s.description,s.source_type AS sourceType,s.status,s.difficulty,s.creator_id AS creatorId,g.id AS groupId,g.name AS groupName,c.id AS categoryId,c.name AS categoryName,(SELECT COUNT(*) FROM user_skills us WHERE us.skill_id=s.id) AS usageCount FROM skills s JOIN skill_groups g ON g.id=s.group_id JOIN categories c ON c.id=g.category_id WHERE s.id=?", id);
         if (!"APPROVED".equals(skill.get("status")) && !Long.valueOf(userId).equals(((Number) skill.get("creatorId")).longValue()))
             throw new ApiException(HttpStatus.NOT_FOUND, "技能不存在");
         skill.put("aliases", db.jdbc.queryForList("SELECT alias FROM skill_aliases WHERE skill_id=? ORDER BY id", id).stream().map(row -> row.get("alias")).toList());
+        skill.put("parents", db.jdbc.queryForList("SELECT p.id,p.name FROM skill_subskills ss JOIN skills p ON p.id=ss.parent_skill_id WHERE ss.child_skill_id=? AND (p.status='APPROVED' OR p.creator_id=?) ORDER BY ss.sort_order,p.id", id, userId));
+        skill.put("subskills", db.jdbc.queryForList("SELECT c.id,c.name FROM skill_subskills ss JOIN skills c ON c.id=ss.child_skill_id WHERE ss.parent_skill_id=? AND (c.status='APPROVED' OR c.creator_id=?) ORDER BY ss.sort_order,c.id", id, userId));
         return skill;
     }
     public void requireVisibleSkill(long skillId, long userId) {
@@ -96,6 +98,7 @@ public class CatalogController {
         if (!List.of("PRIVATE","COMMUNITY").contains(input.visibility())) throw new ApiException(HttpStatus.BAD_REQUEST, "请选择提交方式");
         if (db.jdbc.queryForObject("SELECT COUNT(*) FROM skill_groups WHERE id=?", Long.class, input.groupId()) == 0)
             throw new ApiException(HttpStatus.BAD_REQUEST, "技能组不存在");
+        if (input.parentSkillId() != null) requireVisibleSkill(input.parentSkillId(), userId);
         if (db.jdbc.queryForObject("SELECT COUNT(*) FROM skills s WHERE s.status='APPROVED' AND (s.normalized_name=? OR EXISTS (SELECT 1 FROM skill_aliases a WHERE a.skill_id=s.id AND a.normalized_alias=?))", Long.class, normalized, normalized) > 0)
             throw new ApiException(HttpStatus.CONFLICT, "已有同名技能，请优先使用 Skill Hub 中的技能");
         if (db.jdbc.queryForObject("SELECT COUNT(*) FROM skills WHERE creator_id=? AND normalized_name=? AND status<>'REJECTED'", Long.class, userId, normalized) > 0)
@@ -109,6 +112,9 @@ public class CatalogController {
             if (!normalize(alias).equals(normalized)) db.insert("INSERT INTO skill_aliases (skill_id,alias,normalized_alias) VALUES (?,?,?)", id, alias.trim(), normalize(alias));
         }
         db.insert("INSERT INTO user_skills (user_id,skill_id,level,status,note) VALUES (?,?,1,'WANT_TO_LEARN','')", userId, id);
+        if (input.parentSkillId() != null)
+            db.jdbc.update("INSERT INTO skill_subskills (parent_skill_id,child_skill_id,sort_order) VALUES (?,?,?)",
+                input.parentSkillId(), id, 10000);
         if (decision != null) db.insert("INSERT INTO skill_reviews (skill_id,reason) VALUES (?,?)", id, decision.reason());
         var result = skill(id, authorization);
         result.put("reviewReason", decision == null ? "仅自己可见" : decision.reason());

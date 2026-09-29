@@ -37,7 +37,7 @@ npm install
 npm run dev
 ```
 
-打开 <http://127.0.0.1:5173>。Vite 把 `/api` 代理到本地 `8080` 端口。启动时会增量导入 `backend/src/main/resources/extended-skills.txt` 中的技能，按规范化名称去重，不会清空用户数据。数据会一直保存在 MySQL 的 `skilltree` 库里。
+打开 <http://127.0.0.1:5173>。Vite 把 `/api` 代理到本地 `8080` 端口。启动时会增量导入 `backend/src/main/resources/extended-skills.txt` 中的技能，并按 `subskill-templates.txt`、`curated-subskills.txt` 为官方技能建立细分能力。导入按规范化名称和父子关系去重，不会清空用户数据。数据会一直保存在 MySQL 的 `skilltree` 库里。
 
 `backend/maven-settings.xml` 仅用于绕过本机 Maven 全局配置中无法访问的旧内网仓库；它指向 Maven Central。其他环境可以直接使用普通 Maven 命令。
 
@@ -59,6 +59,8 @@ java -jar target/skilltree-backend-0.1.0.jar
 ## 创建技能与社区发布
 
 新建技能会立即加入创建者的“我的技能”，可直接记录学习进度和加入图谱。默认仅自己可见。选择发布到 Skill Hub 时，系统会检查名称、说明、联系方式和近似重复项；符合规则的投稿自动公开，需要核对的投稿进入 `PENDING`，但创建者仍可使用。管理员可在“审核管理”处理待审核投稿。
+
+Skill Hub 的每项官方技能都包含可单独搜索、添加和记录进度的子技能。技能详情可以沿“上级技能 / 细分技能”继续浏览；用户创建技能时也可指定上级技能。
 
 启动后端前设置 `ADMIN_EMAIL` 和至少 8 位的 `ADMIN_PASSWORD`，首次启动时会创建管理员账号。管理员可以使用邮箱或用户名登录，也可以通过 `/api/auth/profile` 和 `/api/auth/password` 修改用户名和密码。请勿把实际管理员密码写入仓库。
 

@@ -1,0 +1,99 @@
+# 上级官方技能|具名子技能（分号分隔）；已有同名技能只建立关系
+Java|JVM;JDK;JRE;JPMS;JUC;JavaFX;Java NIO;Java Streams;Java 泛型;Java 注解;Java 反射;Java 虚拟线程;Java 内存模型;Java 垃圾回收;Java 集合框架;Java I/O;Java 并发锁;Java GC 调优;Java 字节码;Java 网络编程
+MySQL|InnoDB;InnoDB MVCC;InnoDB Buffer Pool;InnoDB 事务日志;MySQL 索引;MySQL 查询优化器;MySQL 主从复制;MySQL GTID;MySQL 分区;MySQL 事务隔离;MySQL 锁机制;MySQL binlog;MySQL 慢查询;MySQL 备份恢复;MySQL 连接管理;MySQL 权限管理;MySQL 表设计;MySQL EXPLAIN
+PostgreSQL|PostgreSQL MVCC;PostgreSQL VACUUM;PostgreSQL WAL;PostgreSQL 索引;PostgreSQL 查询计划;PostgreSQL 分区;PostgreSQL 复制;PostgreSQL JSONB;PostgreSQL 扩展;PostgreSQL 备份恢复;PostgreSQL 权限管理;PostgreSQL 性能调优
+Redis|Redis 数据类型;Redis 持久化;Redis 主从复制;Redis Sentinel;Redis Cluster;Redis 事务;Redis Lua 脚本;Redis 缓存淘汰;Redis 分布式锁;Redis Stream;Redis 性能分析;Redis 安全配置
+SQLite|SQLite 事务;SQLite WAL;SQLite 索引;SQLite FTS;SQLite JSON;SQLite 备份;SQLite 查询计划;SQLite 并发访问
+MongoDB|MongoDB 文档模型;MongoDB 聚合管道;MongoDB 索引;MongoDB 复制集;MongoDB 分片;MongoDB 事务;MongoDB 查询优化;MongoDB 备份恢复
+SQL|SQL JOIN;SQL 聚合;SQL 窗口函数;SQL 子查询;SQL CTE;SQL 事务;SQL 索引;SQL 执行计划;SQL 视图;SQL 存储过程;SQL 权限控制
+ClickHouse|ClickHouse MergeTree;ClickHouse 分区;ClickHouse 物化视图;ClickHouse SQL;ClickHouse 数据导入;ClickHouse 集群;ClickHouse 查询优化
+Python|Python 语法;Python 标准库;Python 类型标注;Python 装饰器;Python 生成器;Python 异步编程;Python 多进程;Python 包管理;Python 虚拟环境;Python 单元测试;Python 性能分析;Python 数据处理
+JavaScript|JavaScript 闭包;JavaScript 原型链;JavaScript Promise;JavaScript async/await;JavaScript 模块;JavaScript 事件循环;JavaScript DOM;JavaScript 错误处理;JavaScript 内存管理;JavaScript 测试
+TypeScript|TypeScript 泛型;TypeScript 类型守卫;TypeScript 条件类型;TypeScript 映射类型;TypeScript 声明文件;TypeScript 模块;TypeScript 装饰器;TypeScript 项目配置;TypeScript 类型推断
+C++|C++ 模板;C++ STL;C++ 智能指针;C++ RAII;C++ 移动语义;C++ 并发;C++ 编译与链接;C++ 内存管理;C++20 Concepts;C++ 协程
+C#|C# LINQ;C# async/await;C# 泛型;C# 委托与事件;C# 反射;C# 内存管理;C# 模式匹配;C# 单元测试
+Go|Go Goroutine;Go Channel;Go Interface;Go Context;Go Modules;Go 错误处理;Go 并发模式;Go 性能分析;Go 标准库
+Rust|Rust 所有权;Rust 借用;Rust 生命周期;Rust Trait;Rust 模式匹配;Rust 异步编程;Rust Cargo;Rust 宏;Rust 错误处理;Rust Unsafe
+Kotlin|Kotlin 协程;Kotlin 扩展函数;Kotlin 空安全;Kotlin Flow;Kotlin DSL;Kotlin 泛型;Kotlin 多平台;Kotlin 测试
+Swift|Swift Optional;Swift Protocol;Swift Concurrency;SwiftUI 状态;Swift Package Manager;Swift 错误处理;Swift 泛型;Swift 内存管理
+PHP|PHP Composer;PHP 类型系统;PHP 异常处理;PHP 会话管理;PHP 安全实践;PHP 单元测试;PHP 性能优化
+Spring Boot|Spring Boot 自动配置;Spring Boot Starter;Spring Boot Actuator;Spring Boot 配置管理;Spring Boot Web API;Spring Boot 数据访问;Spring Boot 安全;Spring Boot 测试;Spring Boot 日志;Spring Boot 部署
+Spring Security|Spring Security 过滤器链;Spring Security 认证;Spring Security 授权;Spring Security OAuth2;Spring Security CSRF;Spring Security 方法安全
+React|React Hooks;React Context;React 状态管理;React Router;React 表单;React 性能优化;React Suspense;React Server Components;React 测试;React 组件设计
+Vue|Vue 响应式;Vue 组合式 API;Vue Router;Vue 组件通信;Vue 状态管理;Vue 指令;Vue 性能优化;Vue 测试
+Next.js|Next.js App Router;Next.js 服务端组件;Next.js 数据获取;Next.js 缓存;Next.js 中间件;Next.js 部署;Next.js SEO
+Node.js|Node.js 事件循环;Node.js Stream;Node.js 文件系统;Node.js 包管理;Node.js 进程管理;Node.js 调试;Node.js 性能分析
+FastAPI|FastAPI 路由;FastAPI 数据校验;FastAPI 依赖注入;FastAPI 异步接口;FastAPI 认证;FastAPI 测试;FastAPI 部署
+Django|Django ORM;Django 模板;Django 中间件;Django 权限;Django 表单;Django 测试;Django 部署
+HTML|HTML 语义化;HTML 表单;HTML 无障碍;HTML 多媒体;HTML 元数据;HTML SEO
+CSS|CSS 选择器;CSS 盒模型;CSS Flexbox;CSS Grid;CSS 动画;CSS 响应式;CSS 自定义属性;CSS 层叠规则
+Docker|Dockerfile;Docker 镜像构建;Docker 容器网络;Docker 数据卷;Docker Compose 编排;Docker 多阶段构建;Docker 安全;Docker 镜像优化;Docker Registry
+Kubernetes|Kubernetes Pod;Kubernetes Deployment;Kubernetes Service;Kubernetes Ingress;Kubernetes ConfigMap;Kubernetes Secret;Kubernetes StatefulSet;Kubernetes HPA;Kubernetes RBAC;Kubernetes 调度;Kubernetes 网络;Kubernetes 故障排查
+Linux|Linux 文件权限;Linux Shell;Linux 进程管理;Linux systemd;Linux 网络配置;Linux 日志分析;Linux 包管理;Linux 性能分析;Linux 存储管理;Linux 安全加固
+Git|Git 分支;Git 合并;Git Rebase;Git Cherry-pick;Git 冲突解决;Git Hooks;Git Bisect;Git 子模块;Git 工作树;Git 版本回退
+Nginx|Nginx 反向代理;Nginx 负载均衡;Nginx TLS 配置;Nginx 缓存;Nginx 访问控制;Nginx 日志;Nginx 性能调优
+Terraform|Terraform Provider;Terraform Module;Terraform State;Terraform Plan;Terraform 变量;Terraform 工作区;Terraform 安全实践
+AWS|AWS IAM;AWS EC2;AWS S3;AWS VPC;AWS CloudFront;AWS Lambda;AWS RDS;AWS CloudWatch;AWS 成本管理
+Apache Kafka|Kafka Topic;Kafka Producer;Kafka Consumer;Kafka Consumer Group;Kafka Partition;Kafka Offset;Kafka Streams;Kafka Connect;Kafka 可靠性
+Apache Spark|Spark RDD;Spark DataFrame;Spark SQL;Spark Structured Streaming;Spark 调度;Spark 性能调优;Spark 数据倾斜
+PyTorch|PyTorch Tensor;PyTorch Autograd;PyTorch Dataset;PyTorch DataLoader;PyTorch 模型训练;PyTorch 分布式训练;PyTorch 模型导出
+TensorFlow|TensorFlow Tensor;TensorFlow Keras;TensorFlow Dataset;TensorFlow 自动微分;TensorFlow 模型训练;TensorFlow Serving
+大语言模型|Transformer 架构;大模型预训练;指令微调;对齐训练;模型推理;模型评测;大模型安全;上下文窗口
+RAG|RAG 文档切分;RAG 向量化;RAG 混合检索;RAG 重排序;RAG 引用溯源;RAG 评测;RAG 权限控制
+机器学习|监督学习;无监督学习;模型特征;训练验证划分;模型泛化;模型部署;模型监控;机器学习伦理
+Web安全|Web 身份认证安全;Web 会话安全;Web 输入校验;Web 权限控制;Web 安全头;Web 漏洞测试;Web 日志审计
+数据分析|数据清洗;探索性分析;指标定义;统计检验;数据可视化;分析报告;业务建议;分析复盘
+Figma|Figma 组件;Figma 变量;Figma 自动布局;Figma 原型;Figma 设计系统;Figma 团队协作;Figma 交付
+Photoshop|Photoshop 图层;Photoshop 蒙版;Photoshop 选区;Photoshop 调色;Photoshop 修图;Photoshop 合成;Photoshop 批处理
+Blender|Blender 建模;Blender 材质;Blender 灯光;Blender 渲染;Blender 骨骼;Blender 动画;Blender 几何节点
+UI 设计|界面层级;设计规范;组件库设计;界面配色;响应式界面;交互反馈;无障碍界面
+用户研究|用户访谈设计;访谈记录分析;问卷编制;可用性测试设计;用户画像制作;研究洞察表达
+交互设计|交互流程;信息架构;交互原型;微交互;错误状态设计;可用性评估
+视觉设计|视觉层级设计;构图与留白;视觉配色;视觉规范编制;视觉资产交付
+室内设计|室内空间布局;室内照明;材料与饰面;家具配置;室内施工图;室内效果图
+服装设计|服装款式图;服装结构制版;面料选择;服装打样;服装系列设计
+英语|英语发音;英语词汇;英语语法;英语听力训练;英语口语表达;英语阅读;英语写作;英语会话
+日语|日语假名;日语发音;日语词汇;日语语法;日语听力;日语会话;日语阅读;日语写作
+韩语|韩语字母;韩语发音;韩语词汇;韩语语法;韩语听力;韩语会话;韩语阅读
+法语|法语发音;法语词汇;法语语法;法语听力;法语口语;法语阅读;法语写作
+公众演讲|演讲选题;演讲结构;开场设计;声音表达;肢体语言;现场互动;演讲复盘
+英语翻译|英汉笔译;汉英笔译;术语管理;译文校对;文化转换;翻译工具
+摄影|摄影曝光;摄影构图;摄影用光;镜头选择;摄影后期;摄影叙事;摄影作品集
+人像摄影|人像布光;人像引导;人像构图;人像修图;室外人像;棚拍人像
+视频剪辑|视频时间线;节奏剪辑;转场设计;字幕制作;声音剪辑;视频调色;视频输出
+钢琴|钢琴指法;钢琴视奏;钢琴音阶;钢琴和弦;钢琴踏板;钢琴曲目练习
+吉他|吉他和弦;吉他扫弦;吉他指弹;吉他音阶;吉他即兴;吉他伴奏
+写作|写作选题;素材收集;文章结构;初稿写作;文字修订;标题设计;写作反馈
+小说写作|小说人物塑造;小说情节设计;小说场景描写;小说叙事视角;小说对话;小说修改
+绘画|绘画线条;绘画透视;绘画色彩;绘画构图;写生训练;绘画作品集
+市场营销|目标市场分析;营销定位;营销渠道规划;营销内容设计;营销活动执行;营销效果测量
+品牌营销|品牌定位;品牌识别;品牌故事;品牌传播;品牌体验;品牌监测
+财务报表分析|资产负债表分析;利润表分析;现金流量表分析;财务比率分析;财务风险识别
+电子商务|电商选品;电商商品页;电商流量获取;电商转化优化;电商订单履约;电商售后
+销售|销售线索开发;客户需求诊断;销售方案设计;成交谈判;客户关系维护
+烹饪|食材处理;烹饪火候;调味技法;菜品搭配;食品卫生;家庭菜单设计
+烘焙|面团制作;发酵控制;烘焙温度;面包整形;蛋糕制作;烘焙食品保存
+咖啡冲煮|咖啡研磨;咖啡粉水比;手冲咖啡;意式萃取;咖啡奶泡;咖啡感官评估
+家庭收纳|物品分类;收纳空间规划;收纳工具选择;长期维护;断舍离实践
+园艺|土壤配置;植物繁殖;浇水施肥;病虫害管理;修剪整形;季节养护
+学习方法|学习目标拆解;间隔复习;主动回忆;错题分析;学习复盘;知识迁移
+时间管理|任务收集;优先级排序;日程规划;专注时段;时间复盘;干扰管理
+跑步|跑步姿势;跑步配速;跑步耐力;间歇训练;跑步热身;跑步恢复;跑步伤害预防
+游泳|自由泳;蛙泳;仰泳;蝶泳;游泳换气;游泳转身;水中安全
+篮球|篮球运球;篮球投篮;篮球传球;篮球防守;篮球战术;篮球体能
+足球|足球控球;足球传接;足球射门;足球防守;足球战术;足球体能
+瑜伽|瑜伽体式;瑜伽呼吸;瑜伽柔韧;瑜伽序列;瑜伽安全
+力量训练|深蹲;硬拉;卧推;力量训练计划;力量动作评估;力量训练恢复
+项目管理|项目范围管理;项目进度计划;项目资源配置;项目风险登记;项目质量控制;项目沟通计划;项目收尾复盘
+团队管理|团队目标对齐;团队一对一沟通;团队任务分工;团队反馈;团队冲突调解;团队绩效复盘
+招聘面试|岗位需求分析;简历筛选;结构化面试;面试评价;候选人沟通;入职衔接
+教学设计|学习目标编写;教学活动设计;教学材料制作;形成性评价;教学反馈分析
+微积分|极限;导数;积分;多元微积分;微分方程入门;微积分应用
+线性代数|矩阵运算;向量空间;线性变换;特征值与特征向量;线性方程组;正交分解
+概率论|随机变量;概率分布;条件概率;大数定律;中心极限定理;概率模型
+数理统计|参数估计;假设检验;置信区间;回归分析;方差分析;统计推断
+论文写作|论文选题;文献综述写作;研究方法写作;结果呈现;讨论与结论;引用规范
+InnoDB|InnoDB Undo Log;InnoDB Redo Log;InnoDB Change Buffer;InnoDB 聚簇索引;InnoDB 锁;InnoDB 崩溃恢复;InnoDB 行格式;InnoDB 页结构
+JPMS|module-info.java;JPMS requires;JPMS exports;JPMS opens;JPMS provides;JPMS uses;JPMS Module Path;JPMS jlink
+JUC|JUC Executor;JUC Future;JUC CompletableFuture;JUC Lock;JUC Atomic;JUC ConcurrentHashMap;JUC CountDownLatch;JUC Semaphore;JUC ForkJoinPool;JUC ThreadPoolExecutor
+JavaFX|JavaFX Scene Graph;JavaFX FXML;JavaFX Controls;JavaFX CSS;JavaFX Properties;JavaFX Binding;JavaFX Animation;JavaFX Threading
