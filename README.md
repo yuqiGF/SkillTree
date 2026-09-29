@@ -1,6 +1,7 @@
 # SkillTree · 第一版
 
 个人技能图谱平台。包含注册登录、公共 Skill Hub、分类和别名搜索、个人技能状态、可拖拽的有向无环图、私有技能与社区投稿审核。
+技能搜索先显示上层技能，可逐级展开子技能；添加子技能时会一并加入上级技能。“我的技能”按父子层级展示每项学习进度。图谱中提供从下向上生长的个人总体树与各分类树，随“我的技能”自动更新；树卡片可选择显示或隐藏，节点可展开或收起分支。另可创建自由布局的自定义图谱。
 当前测试服务地址：http://103.39.64.76:57144/
 
 开发者：**宇崎崎andGPT** · 联系方式：[yuqigf@qq.com](mailto:yuqigf@qq.com) · 开源协议：[MIT](LICENSE)
@@ -38,6 +39,8 @@ npm run dev
 ```
 
 打开 <http://127.0.0.1:5173>。Vite 把 `/api` 代理到本地 `8080` 端口。启动时会增量导入 `backend/src/main/resources/extended-skills.txt` 中的技能，并按 `subskill-templates.txt`、`curated-subskills.txt` 为官方技能建立细分能力。导入按规范化名称和父子关系去重，不会清空用户数据。数据会一直保存在 MySQL 的 `skilltree` 库里。
+
+图谱页的“管理显示”会把选择按账号保存在当前浏览器；隐藏图谱不会删除其中的技能或学习记录。
 
 `backend/maven-settings.xml` 仅用于绕过本机 Maven 全局配置中无法访问的旧内网仓库；它指向 Maven Central。其他环境可以直接使用普通 Maven 命令。
 

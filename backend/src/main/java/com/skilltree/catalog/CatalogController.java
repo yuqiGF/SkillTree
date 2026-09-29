@@ -10,9 +10,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.text.Normalizer;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -37,16 +41,28 @@ public class CatalogController {
     }
     @GetMapping({"/skills", "/skills/search"})
     public List<Map<String, Object>> skills(@RequestParam(required=false) String q, @RequestParam(required=false) Long categoryId,
-        @RequestParam(required=false) Long groupId, @RequestParam(defaultValue="0") @Min(0) @Max(1000) int page,
+        @RequestParam(required=false) Long groupId, @RequestParam(defaultValue="false") boolean rootOnly,
+        @RequestParam(defaultValue="0") @Min(0) @Max(1000) int page,
         @RequestHeader(value="Authorization",required=false) String authorization) {
         long userId = authorization == null ? -1 : auth.userId(authorization);
         StringBuilder sql = new StringBuilder("SELECT s.id,s.name,s.description,s.source_type AS sourceType,s.status,s.difficulty,g.id AS groupId,g.name AS groupName,c.id AS categoryId,c.name AS categoryName,(SELECT COUNT(*) FROM user_skills us WHERE us.skill_id=s.id) AS usageCount,(SELECT COUNT(*) FROM skill_subskills ss JOIN skills child ON child.id=ss.child_skill_id WHERE ss.parent_skill_id=s.id AND (child.status='APPROVED' OR child.creator_id=?)) AS subskillCount FROM skills s JOIN skill_groups g ON g.id=s.group_id JOIN categories c ON c.id=g.category_id WHERE (s.status='APPROVED' OR s.creator_id=?)");
         List<Object> args = new ArrayList<>(); args.add(userId); args.add(userId);
         if (categoryId != null) { sql.append(" AND c.id=?"); args.add(categoryId); }
         if (groupId != null) { sql.append(" AND g.id=?"); args.add(groupId); }
+        if (rootOnly) {
+            sql.append(" AND NOT EXISTS (SELECT 1 FROM skill_subskills hierarchy JOIN skills parent ON parent.id=hierarchy.parent_skill_id WHERE hierarchy.child_skill_id=s.id AND (parent.status='APPROVED' OR parent.creator_id=?))");
+            args.add(userId);
+        }
         if (q != null && !q.isBlank()) {
-            sql.append(" AND (s.normalized_name LIKE ? OR EXISTS (SELECT 1 FROM skill_aliases a WHERE a.skill_id=s.id AND a.normalized_alias LIKE ?) OR EXISTS (SELECT 1 FROM skill_subskills ss JOIN skills parent ON parent.id=ss.parent_skill_id WHERE ss.child_skill_id=s.id AND parent.normalized_name LIKE ? AND (parent.status='APPROVED' OR parent.creator_id=?)))");
+            sql.append(" AND (s.normalized_name LIKE ? OR EXISTS (SELECT 1 FROM skill_aliases a WHERE a.skill_id=s.id AND a.normalized_alias LIKE ?) OR EXISTS (SELECT 1 FROM skill_subskills ss JOIN skills parent ON parent.id=ss.parent_skill_id WHERE ss.child_skill_id=s.id AND parent.normalized_name LIKE ? AND (parent.status='APPROVED' OR parent.creator_id=?))");
             String needle = "%" + normalize(q) + "%"; args.add(needle); args.add(needle); args.add(needle); args.add(userId);
+            if (rootOnly) {
+                sql.append(" OR EXISTS (SELECT 1 FROM skill_subskills ss JOIN skills child ON child.id=ss.child_skill_id WHERE ss.parent_skill_id=s.id AND child.normalized_name LIKE ? AND (child.status='APPROVED' OR child.creator_id=?))");
+                args.add(needle); args.add(userId);
+                sql.append(" OR EXISTS (SELECT 1 FROM skill_subskills first_level JOIN skill_subskills second_level ON second_level.parent_skill_id=first_level.child_skill_id JOIN skills grandchild ON grandchild.id=second_level.child_skill_id WHERE first_level.parent_skill_id=s.id AND grandchild.normalized_name LIKE ? AND (grandchild.status='APPROVED' OR grandchild.creator_id=?))");
+                args.add(needle); args.add(userId);
+            }
+            sql.append(")");
             sql.append(" ORDER BY CASE WHEN s.normalized_name=? THEN 0 WHEN EXISTS (SELECT 1 FROM skill_aliases a WHERE a.skill_id=s.id AND a.normalized_alias=?) THEN 1 WHEN s.normalized_name LIKE ? THEN 2 ELSE 3 END,usageCount DESC,s.name");
             args.add(normalize(q)); args.add(normalize(q)); args.add(normalize(q) + "%");
         } else sql.append(" ORDER BY usageCount DESC,s.id");
@@ -68,10 +84,35 @@ public class CatalogController {
         List<Map<String,Object>> rows = db.jdbc.queryForList("SELECT id FROM skills WHERE id=? AND (status='APPROVED' OR creator_id=?)", skillId, userId);
         if (rows.isEmpty()) throw new ApiException(HttpStatus.NOT_FOUND, "技能不存在");
     }
+    public void ensureParentSkills(long userId, long skillId) {
+        ArrayDeque<Long> pending = new ArrayDeque<>();
+        Set<Long> visited = new HashSet<>();
+        pending.add(skillId);
+        while (!pending.isEmpty()) {
+            long childId = pending.removeFirst();
+            if (!visited.add(childId)) continue;
+            List<Map<String,Object>> parents = db.jdbc.queryForList("SELECT p.id FROM skill_subskills ss JOIN skills p ON p.id=ss.parent_skill_id WHERE ss.child_skill_id=? AND (p.status='APPROVED' OR p.creator_id=?) ORDER BY ss.sort_order,p.id", childId, userId);
+            for (Map<String,Object> parent : parents) {
+                long parentId = ((Number) parent.get("id")).longValue();
+                if (db.jdbc.queryForObject("SELECT COUNT(*) FROM user_skills WHERE user_id=? AND skill_id=?", Long.class, userId, parentId) == 0)
+                    db.insert("INSERT INTO user_skills (user_id,skill_id,level,status) VALUES (?,?,1,'WANT_TO_LEARN')", userId, parentId);
+                pending.add(parentId);
+            }
+        }
+    }
     @GetMapping("/me/skills")
+    @Transactional
     public List<Map<String,Object>> mySkills(@RequestHeader(value="Authorization",required=false) String authorization) {
         long userId = auth.userId(authorization);
-        return db.jdbc.queryForList("SELECT s.id,s.name,s.description,s.source_type AS sourceType,u.level,u.status,u.note,g.name AS groupName,c.name AS categoryName FROM user_skills u JOIN skills s ON s.id=u.skill_id JOIN skill_groups g ON g.id=s.group_id JOIN categories c ON c.id=g.category_id WHERE u.user_id=? ORDER BY u.updated_at DESC", userId);
+        for (Map<String,Object> row : db.jdbc.queryForList("SELECT skill_id FROM user_skills WHERE user_id=?", userId))
+            ensureParentSkills(userId, ((Number) row.get("skill_id")).longValue());
+        List<Map<String,Object>> skills = db.jdbc.queryForList("SELECT s.id,s.name,s.description,s.source_type AS sourceType,u.level,u.status,u.note,g.id AS groupId,g.name AS groupName,c.id AS categoryId,c.name AS categoryName FROM user_skills u JOIN skills s ON s.id=u.skill_id JOIN skill_groups g ON g.id=s.group_id JOIN categories c ON c.id=g.category_id WHERE u.user_id=? ORDER BY u.updated_at DESC", userId);
+        Map<Long,List<Map<String,Object>>> parentsByChild = new HashMap<>();
+        for (Map<String,Object> row : db.jdbc.queryForList("SELECT ss.child_skill_id AS childId,p.id,p.name FROM skill_subskills ss JOIN skills p ON p.id=ss.parent_skill_id JOIN user_skills u ON u.skill_id=ss.child_skill_id AND u.user_id=? WHERE p.status='APPROVED' OR p.creator_id=? ORDER BY ss.sort_order,p.id", userId, userId))
+            parentsByChild.computeIfAbsent(((Number) row.get("childId")).longValue(), ignored -> new ArrayList<>()).add(Map.of("id", row.get("id"), "name", row.get("name")));
+        for (Map<String,Object> skill : skills)
+            skill.put("parents", parentsByChild.getOrDefault(((Number) skill.get("id")).longValue(), List.of()));
+        return skills;
     }
     @PutMapping("/me/skills/{skillId}")
     @Transactional
@@ -83,6 +124,7 @@ public class CatalogController {
         int changed = db.jdbc.update("UPDATE user_skills SET level=?,status=?,note=?,updated_at=CURRENT_TIMESTAMP WHERE user_id=? AND skill_id=?",
             input.level(), input.status(), input.note(), userId, skillId);
         if (changed == 0) db.insert("INSERT INTO user_skills (user_id,skill_id,level,status,note) VALUES (?,?,?,?,?)", userId, skillId, input.level(), input.status(), input.note());
+        ensureParentSkills(userId, skillId);
         return db.one("SELECT skill_id AS skillId,level,status,note FROM user_skills WHERE user_id=? AND skill_id=?", userId, skillId);
     }
     @DeleteMapping("/me/skills/{skillId}")
